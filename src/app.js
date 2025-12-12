@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
+const cors = require('cors');
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -8,15 +9,61 @@ const https = require('https');
 const crypto = require('crypto');
 
 const app = express();
+
+const corsOptions = {
+    origin: 'http://localhost:8080', 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- CORREÇÃO 1: USAR VARIÁVEIS DE AMBIENTE E O NOME DO SERVIÇO 'mysql' ---
+const DB_HOST = process.env.DB_HOST || 'mysql'; 
+const DB_USER = process.env.DB_USER || 'root';
+const DB_PASSWORD = process.env.DB_PASSWORD || 'password';
+const DB_DATABASE = process.env.DB_DATABASE || 'vulnerable_db';
+
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'vulnerable_db'
+    host: DB_HOST,
+    user: DB_USER,
+    password: DB_PASSWORD,
+    database: DB_DATABASE
 });
+
+// Lidar com desconexão do DB
+db.on('error', (err) => {
+    console.error('ERRO FATAL NO BANCO DE DADOS:', err.code);
+    // Em um ambiente de produção, aqui deveria haver uma lógica de reconexão.
+});
+// -------------------------------------------------------------------------
+
+
+// --- CORREÇÃO 2: ADICIONAR ENDPOINT /HEALTH ---
+app.get('/health', (req, res) => {
+    // Usa db.ping para verificar a conexão sem fazer uma query completa
+    db.ping(err => {
+        const dbStatus = err ? 'disconnected' : 'connected';
+        const status = dbStatus === 'connected' ? 'healthy' : 'unhealthy';
+
+        if (err) {
+            console.error('DB Health Check Failed:', err.message);
+        }
+
+        // Retorna 200/healthy ou 503/unhealthy dependendo do status do DB
+        res.status(dbStatus === 'connected' ? 200 : 503).json({
+            status: status,
+            database: dbStatus,
+            timestamp: new Date().toISOString()
+        });
+    });
+});
+// ---------------------------------------------
+
 
 app.get('/users/:id', (req, res) => {
     const userId = req.params.id;
@@ -164,7 +211,7 @@ app.use((req, res) => {
 module.exports = app;
 
 if (require.main === module) {
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
         console.log(`SERVIDOR EXECUTANDO NA PORTA ${PORT}`);
     });
