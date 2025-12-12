@@ -12,6 +12,9 @@ jobs:
   teste-e-analise:
     name: Testes e SonarCloud
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
