@@ -8,13 +8,15 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   teste-e-analise:
     name: Testes e SonarCloud
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -37,9 +39,6 @@ jobs:
   sonarqube:
     name: SonarQube
     runs-on: windows-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,8 +82,6 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
-      issues: write
-      pull-requests: write
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
