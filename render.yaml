@@ -2,23 +2,19 @@ services:
   # 1. Banco de Dados PostgreSQL Gerenciado
   - type: pserv
     name: p2-database
-    plan: free
+    plan: free 
 
-  # 2. Serviço de Backend (Node.js/Docker)
+  # 2. Serviço de Backend (Docker)
   - type: web
     name: p2-backend
     dockerContext: .
-    dockerfilePath: Dockerfile # Corrigido
+    dockerfilePath: Dockerfile # 🚨 Corrigido: dockerfile -> dockerfilePath
     autoDeploy: true
-    # 🚨 CRÍTICO: REMOVIDO 'env: node' para forçar o deploy Docker
     plan: free
-    # Removido 'port: 3001'
-    
-    buildCommand: npm install
-    startCommand: node app.js 
+    # Removido 'env: node' e 'port'
     
     envVars:
-      # CORREÇÃO DE SINTAXE: Usando o formato aninhado para referenciar serviços
+      # 🚨 CORREÇÃO DE SINTAXE: Interligação do DB (Resolve cannot unmarshal)
       - key: DATABASE_URL
         value:
           fromDatabase: p2-database
@@ -27,17 +23,17 @@ services:
       - key: NODE_ENV
         value: production
 
-  # 3. Serviço de Frontend (React/Vite com Nginx/Docker)
+  # 3. Serviço de Frontend (Docker)
   - type: web
     name: p2-frontend
     dockerContext: ./frontend
-    dockerfilePath: Dockerfile # Corrigido
+    dockerfilePath: Dockerfile # 🚨 Corrigido: dockerfile -> dockerfilePath
     autoDeploy: true
     plan: free
-    # Removido 'port: 80'
+    # Removido 'port'
     
     envVars:
-      # CORREÇÃO DE SINTAXE: Mapeia a URL pública do Backend
+      # 🚨 CORREÇÃO DE SINTAXE: Mapeia a URL pública do Backend
       - key: VITE_API_URL
         value:
           fromService: p2-backend
