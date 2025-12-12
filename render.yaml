@@ -1,39 +1,29 @@
 services:
-  # 1. Banco de Dados PostgreSQL Gerenciado
   - type: pserv
     name: p2-database
-    plan: free 
+    plan: free
 
-  # 2. Serviço de Backend (Docker)
   - type: web
     name: p2-backend
     dockerContext: .
-    dockerfilePath: Dockerfile # 🚨 Corrigido: dockerfile -> dockerfilePath
+    dockerfilePath: Dockerfile
     autoDeploy: true
     plan: free
-    # Removido 'env: node' e 'port'
-    
     envVars:
-      # 🚨 CORREÇÃO DE SINTAXE: Interligação do DB (Resolve cannot unmarshal)
       - key: DATABASE_URL
         value:
           fromDatabase: p2-database
           property: connectionString
-      
       - key: NODE_ENV
         value: production
 
-  # 3. Serviço de Frontend (Docker)
   - type: web
     name: p2-frontend
     dockerContext: ./frontend
-    dockerfilePath: Dockerfile # 🚨 Corrigido: dockerfile -> dockerfilePath
+    dockerfilePath: Dockerfile
     autoDeploy: true
     plan: free
-    # Removido 'port'
-    
     envVars:
-      # 🚨 CORREÇÃO DE SINTAXE: Mapeia a URL pública do Backend
       - key: VITE_API_URL
         value:
           fromService: p2-backend
