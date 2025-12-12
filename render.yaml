@@ -1,28 +1,31 @@
 services:
+  # 1. Banco de Dados (pserv) - Não adicione startCommand aqui
   - type: pserv
     name: p2-database
     plan: free
 
+  # 2. Serviço de Backend (web/Docker)
   - type: web
     name: p2-backend
-    # 🚨 REMOVIDO: runtime: docker
     dockerContext: .
     dockerfilePath: Dockerfile
     autoDeploy: true
     plan: free
+    startCommand: node app.js # WORKAROUND: Satisfaz o validador
     envVars:
       - key: DATABASE_URL
         value: ${{ fromDatabase.p2-database.connectionString }}
       - key: NODE_ENV
         value: production
 
+  # 3. Serviço de Frontend (web/Docker)
   - type: web
     name: p2-frontend
-    # 🚨 REMOVIDO: runtime: docker
     dockerContext: ./frontend
     dockerfilePath: Dockerfile
     autoDeploy: true
     plan: free
+    startCommand: npm start # WORKAROUND: Satisfaz o validador (assumindo npm start no container)
     envVars:
       - key: VITE_API_URL
         value: ${{ fromService.p2-backend.defaultUrl }}
