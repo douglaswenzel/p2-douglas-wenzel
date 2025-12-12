@@ -2,41 +2,36 @@ services:
   - type: pserv
     name: p2-database
     plan: free
-    databaseName: vulnerable_db_p2
-    user: douglas_p2
   - type: web
     name: p2-backend
     dockerContext: .
-    dockerfile: Dockerfile
+    dockerfilePath: Dockerfile 
     autoDeploy: true
     env: node
     plan: free
-    port: 3001
+    
     buildCommand: npm install
-    startCommand: node app.js
+    startCommand: node app.js 
+    
     envVars:
       - key: DB_HOST
-        fromDatabase: p2-database
+        value: ${{ secrets.DATABASE_HOST }}
         property: host
-      - key: DB_USER
+
+      - key: DATABASE_URL 
         fromDatabase: p2-database
-        property: user
-      - key: DB_PASSWORD
-        fromDatabase: p2-database
-        property: password
-      - key: DB_DATABASE
-        fromDatabase: p2-database
-        property: database
+        property: connectionString
+
       - key: NODE_ENV
         value: production
 
   - type: web
     name: p2-frontend
     dockerContext: ./frontend
-    dockerfile: Dockerfile
+    dockerfilePath: Dockerfile 
     autoDeploy: true
     plan: free
-    port: 80
+    
     envVars:
       - key: VITE_API_URL
         fromService: p2-backend
