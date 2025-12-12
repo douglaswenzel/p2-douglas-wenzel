@@ -71,10 +71,6 @@ if (process.env.DATABASE_URL) {
     });
 }
 
-// ----------------------------------------------------
-// MONTAGEM DAS ROTAS MODULARIZADAS
-// ----------------------------------------------------
-
 // Rota de Usuários Segura (users.js)
 // Accessível em: /api/users
 app.use('/api/users', usersRouter);
