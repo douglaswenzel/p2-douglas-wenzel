@@ -39,10 +39,10 @@ services:
     restart: always
     ports:
       - "8080:80" 
-    environment:
-      REACT_APP_API_URL: http://backend:3001 
     depends_on:
       - backend
+    environment:
+      - VITE_API_URL=http://localhost:3001
 
 volumes:
   mysql_data:
